@@ -6,27 +6,36 @@
 #time ($2) - jak stare pliki mają zostać zwrócone. Parametr podawany jest w dniach 
 #Hasło jest przechowywane w osobnym pliku. Jest to wygenerowany kod dla aplikacji na mailu sender
 
-sender="mat.janczura@gmail.com"
-receiver="mati09091993@gmail.com"
-gapp=$(cat /home/ofey/secret/secret_mail)
-sub=$(echo Raport z serwera bazodanowego "$HOSTNAME")
+smtp_server="smtps://smtp.gmail.com:465"
+from_email="mat.janczura@gmail.com"
+user_acc="mat.janczura@gmail.com"
+user_pass=$(cat /home/ofey/secret/secret_mail)
 path=$1
 time=$2
 
+mail_subject=$(echo Raport z serwera bazodanowego "$HOSTNAME")
+
+
+
+
+send_email() {
+  recipient="$1"
+
+
+  result=$(curl --url $smtp_server --ssl-reqd \
+  --mail-from $from_email \
+  --mail-rcpt $recipient \
+  --user $user_acc:$user_pass \
+  -T <(echo -e "From: $from_email\nTo: $recipient\nSubject: $mail_subject\n\n $mail_template_text"))
+
+  echo "email for user $recipient has been sent"
+}
+
 if [[ -d $path && $time -gt 0 ]]
 then
-body=$(find $1 -mtime +$time | sed 's/\/root\/PoC\/test\///')
+mail_template_text=$(find $1 -mtime +$time | sed 's/\/root\/PoC\/test\///')
+send_email "mati09091993@gmail.com"
 
-
-curl -s --url 'smtps://smtp.gmail.com:465' --ssl-reqd \
---mail-from $sender \
---mail-rcpt $receiver \
---user $sender:$gapp \
- -T <(echo -e "From:${sender} 
-To:${receiver} 
-Subject:${sub}
-
-${body}")
 else
 	echo "Błąd, sprawdź poprawność ścieżki lub parametru"
 	echo "Scieżka powinna wskazywać na folder. Podałeś: $path"
