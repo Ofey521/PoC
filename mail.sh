@@ -13,10 +13,7 @@ user_pass=$(cat /home/ofey/secret/secret_mail)
 path=$1
 time=$2
 
-mail_subject=$(echo Raport z serwera bazodanowego "$HOSTNAME")
-
-
-
+mail_subject=$(echo Raport1 z serwera bazodanowego "$HOSTNAME")
 
 send_email() {
   recipient="$1"
@@ -31,9 +28,9 @@ send_email() {
   echo "email for user $recipient has been sent"
 }
 
-if [[ -d $path && $time -gt 0 ]]
+if [[ -d $path ]]
 then
-mail_template_text=$(find $1 -mtime +$time | sed 's/\/root\/PoC\/test\///')
+mail_template_text=$(find $1 -mtime $time | sed 's/..\/db.TESTING_//')
 send_email "mati09091993@gmail.com"
 
 else
