@@ -15,10 +15,10 @@ def entryQuestin():
     return proj, smd_or_app, before, after
 
 
-def showReplaceProject(proj):
+def showReplaceProject(proj, exept=[]):
     print("\nZmiany zostaną naniesione w środowiskach: ")
     for i in os.listdir(proj):
-        if i == ".DS_Store":
+        if i in exept:
             continue
         else:
             print(i)
@@ -49,23 +49,22 @@ def findReplace(directory, find, replace, filePattern):
                 f.write(s)
 
 def changeEnvironment():
-    dropEnv = input("Podaj po spacji środowiska, w których nie dokonujesz zmian")
-    return dropEnv
+    dropEnv = input("Podaj po spacji środowiska, w których nie dokonujesz zmian:\n")
+    dropEnvList = dropEnv.split()
+    return dropEnvList
 
 
-def replaceMethod(smd_or_app, accept):
+def replaceMethod(smd_or_app, accept, replace=[]):
     if smd_or_app == "smd" and accept == "y":
         for i in os.listdir(proj):
-            if i == ".DS_Store":
+            if i in replace:
                 continue
             findReplace("{}/{}/neos".format(proj, i), "{}".format(before), "{}".format(after), "*.smd")
     elif smd_or_app == "app" and accept == "y":
         for i in os.listdir(proj):
-            if i == ".DS_Store":
+            if i in replace:
                 continue
             findReplace("{}/{}/teneum_client".format(proj, i), "{}".format(before), "{}".format(after), "*.app")
-    else:
-        print("Niezaakceptowałeś zmian")
 
 
 proj, smd_or_app, before, after = entryQuestin()
@@ -74,18 +73,18 @@ if checkCorrectParameters(proj,smd_or_app):
     showReplaceProject(proj)
     accept = input("Akceptujesz zmiany? [y/N]\n").lower()
 else:
-    print("\nPodałeś złe parametry, spróbuj ponownie")
+    print("\nParametry zostały podane niewłaściwie, spróbuj ponownie")
     entryQuestin()
 
-change = input("Niezaakceptowałeś zmian, chcesz dokonać korekty?\n")
-if change:
-    print("Zmiany")
-    replace = changeEnvironment()
-    print("ShowReplace")
 
-    print("Accept")
-    print("replaceMethod")
+if accept == 'y':
+    replaceMethod(smd_or_app, accept)
 else:
-    print("Koniec")
-
-replaceMethod(smd_or_app, accept)
+    change = input("Zmiany nie zostały zaakceptowane, chcesz dokonać korekty? [y/n]\n")
+    if change == 'y':
+        replace = changeEnvironment()
+        showReplaceProject(proj, replace)
+        accept = input("Akceptujesz zmiany? [y/N]\n").lower()
+        replaceMethod(smd_or_app, accept, replace)
+    else:
+        print("Koniec")
